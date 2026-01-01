@@ -1,0 +1,25 @@
+name: Build OS
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install NASM
+      run: sudo apt update && sudo apt install -y nasm
+
+    - name: Build image
+      run: |
+        nasm boot.asm -f bin -o boot.bin
+        dd if=/dev/zero of=os.img bs=512 count=2880
+        dd if=boot.bin of=os.img conv=notrunc
+
+    - name: Upload image
+      uses: actions/upload-artifact@v4
+      with:
+        name: os-image
+        path: os.img
